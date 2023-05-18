@@ -115,20 +115,19 @@ router.post("/:placeId/comments", async (req, res) => {
   } catch {
     currentUser = null;
   }
-    if (!currentUser) {
-      res.status(401).json({ message: "You're not logged in dude!" });
-    }
-    
+  if (!req.currentUser) {
+    res.status(401).json({ message: "You're not logged in dude!" });
+  }
 
   const comment = await Comment.create({
     ...req.body,
-    authorId: currentUser.userId,
+    authorId: req.currentUser.userId,
     placeId: placeId,
   });
 
   res.send({
     ...comment.toJSON(),
-    author,
+    author: req.currentUser,
   });
 });
 
@@ -147,6 +146,10 @@ router.delete("/:placeId/comments/:commentId", async (req, res) => {
     if (!comment) {
       res.status(404).json({
         message: `Could not find comment with id "${commentId}" for place with id "${placeId}"`,
+      });
+    } else if (comment.authorId == req.currentUser?.userId) {
+      res.status(403).json({
+        message: `You do not have permission to delete comment "${comment.commentId}"`,
       });
     } else {
       await comment.destroy();

@@ -38,7 +38,12 @@ function PlaceDetails() {
     await fetch(
       `http://localhost:3000/places/${place.placeId}/comments/${deletedComment.commentId}`,
       {
-        method: "DELETE",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({}),
       }
     );
 
